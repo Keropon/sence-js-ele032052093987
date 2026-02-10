@@ -1,0 +1,19 @@
+{
+  "name": "e3m6",
+  "version": "1.0.0",
+  "description": "Servidor Express con contenidos estaticos y dinamicos usando Handlebars",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "hbs": "^4.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
