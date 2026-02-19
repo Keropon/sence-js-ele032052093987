@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Libro de Visitas</title>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/style.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Libro de Visitas</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Inicio</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <h1>Libro de Visitas</h1>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        Nuevo Mensaje
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="/nuevo-mensaje">
+                            <div class="mb-3">
+                                <label for="usuario" class="form-label">Tu nombre:</label>
+                                <input type="text" class="form-control" id="usuario" name="usuario" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="mensaje" class="form-label">Tu mensaje:</label>
+                                <textarea class="form-control" id="mensaje" name="mensaje" rows="4" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Enviar Mensaje</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <a href="/" class="btn btn-outline-dark">Ver todos los mensajes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">Copyright 2025</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">Express + Handlebars</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
