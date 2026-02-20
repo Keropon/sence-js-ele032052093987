@@ -1,0 +1,17 @@
+{
+  "name": "e5m6",
+  "version": "1.0.0",
+  "description": "**Objetivo:** Desarrollar una aplicación de línea de comandos (CLI) capaz de interpretar comandos y argumentos pasados desde la terminal. Utilizarás la librería `yargs` para parsear los argumentos de forma estructurada y el bloque `try/catch` para gestionar errores de manera robusta y prevenir que la aplicación se cierre inesperadamente.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "commander": "^14.0.3",
+    "picocolors": "^1.1.1"
+  }
+}
