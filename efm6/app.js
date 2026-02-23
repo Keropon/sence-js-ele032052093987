@@ -11,6 +11,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
 
+// Servir GSAP desde node_modules
+app.use('/gsap', express.static(path.join(__dirname, 'node_modules', 'gsap')));
+
 // Motor de plantillas
 app.engine('hbs', engine({
   extname: '.hbs',
@@ -18,7 +21,9 @@ app.engine('hbs', engine({
   layoutsDir: path.join(__dirname, 'views/layouts'),
   partialsDir: path.join(__dirname, 'views/partials'),
   helpers: {
-    length: arr => Array.isArray(arr) ? arr.length : 0
+    length:     arr => Array.isArray(arr) ? arr.length : 0,
+    eq:         (a, b) => a === b,
+    formatDate: s => s ? s.split('-').reverse().join('/') : ''
   }
 }));
 app.set('view engine', 'hbs');
@@ -44,7 +49,8 @@ app.get('/dashboard', (req, res) => {
 
 // ── Ruta POST: agregar tarjeta ─────────────────────
 app.post('/nueva-tarjeta', (req, res) => {
-  const { boardId, listId, title, description } = req.body;
+  const { boardId, listId, titulo, descripcion, prioridad, tag,
+          fecha_inicio, fecha_fin, autor, responsable } = req.body;
 
   const contenido = fs.readFileSync('data.json', 'utf-8');
   const data = JSON.parse(contenido);
@@ -58,10 +64,20 @@ app.post('/nueva-tarjeta', (req, res) => {
         if (c.id > maxId) maxId = c.id;
       })));
 
+      const today = new Date().toISOString().split('T')[0];
+
       list.cards.push({
-        id: maxId + 1,
-        title: title.trim(),
-        description: (description || '').trim()
+        id:             maxId + 1,
+        titulo:         (titulo      || '').trim(),
+        descripcion:    (descripcion || '').trim(),
+        prioridad:      prioridad    || 'Task',
+        tag:            tag          || 'Feature',
+        estado:         list.estado  || 'Backlog',
+        fecha_creacion: today,
+        fecha_inicio:   fecha_inicio || '',
+        fecha_fin:      fecha_fin    || '',
+        autor:          (autor        || '').trim(),
+        responsable:    (responsable  || '').trim()
       });
     }
   }
@@ -72,7 +88,8 @@ app.post('/nueva-tarjeta', (req, res) => {
 
 // ── Ruta POST: editar tarjeta ──────────────────────
 app.post('/editar-tarjeta', (req, res) => {
-  const { cardId, boardId, listId, title, description } = req.body;
+  const { cardId, boardId, listId, titulo, descripcion, prioridad, tag,
+          fecha_inicio, fecha_fin, autor, responsable } = req.body;
 
   const contenido = fs.readFileSync('data.json', 'utf-8');
   const data = JSON.parse(contenido);
@@ -83,8 +100,14 @@ app.post('/editar-tarjeta', (req, res) => {
     if (list) {
       const card = list.cards.find(c => c.id === parseInt(cardId));
       if (card) {
-        card.title = title.trim();
-        card.description = (description || '').trim();
+        card.titulo       = (titulo      || '').trim();
+        card.descripcion  = (descripcion || '').trim();
+        card.prioridad    = prioridad    || card.prioridad;
+        card.tag          = tag          || card.tag;
+        card.fecha_inicio = fecha_inicio || card.fecha_inicio;
+        card.fecha_fin    = fecha_fin    || card.fecha_fin;
+        card.autor        = (autor       || '').trim() || card.autor;
+        card.responsable  = (responsable || '').trim() || card.responsable;
       }
     }
   }
@@ -114,10 +137,31 @@ app.post('/mover-tarjeta', (req, res) => {
   if (cardIndex === -1) return res.status(400).json({ ok: false, error: 'Tarjeta no encontrada' });
 
   const [card] = fromList.cards.splice(cardIndex, 1);
+  card.estado = toList.estado || card.estado;
   toList.cards.push(card);
 
   fs.writeFileSync('data.json', JSON.stringify(data, null, 2));
   res.json({ ok: true });
+});
+
+// ── Ruta POST: eliminar tarjeta ────────────────────
+app.post('/eliminar-tarjeta', (req, res) => {
+  const { cardId, boardId, listId } = req.body;
+
+  const contenido = fs.readFileSync('data.json', 'utf-8');
+  const data = JSON.parse(contenido);
+
+  const board = data.boards.find(b => b.id === parseInt(boardId));
+  if (board) {
+    const list = board.lists.find(l => l.id === parseInt(listId));
+    if (list) {
+      const cardIndex = list.cards.findIndex(c => c.id === parseInt(cardId));
+      if (cardIndex !== -1) list.cards.splice(cardIndex, 1);
+    }
+  }
+
+  fs.writeFileSync('data.json', JSON.stringify(data, null, 2));
+  res.redirect('/dashboard');
 });
 
 app.listen(port, () => {

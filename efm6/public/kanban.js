@@ -1,9 +1,5 @@
 'use strict';
 
-let draggedCard   = null;
-let dragFromList  = null;
-let dragFromBoard = null;
-
 // afterMove runs synchronously inside the transition callback,
 // guaranteeing the count update sees the already-moved card.
 function moveCardToColumn(card, targetCol, afterMove) {
@@ -35,158 +31,86 @@ function persistMove(cardId, fromBoardId, fromListId, toBoardId, toListId) {
     .catch(() => location.reload());
 }
 
-// ── Desktop Drag & Drop ──────────────────────────────
-function initDesktopDrag() {
+// ── GSAP Draggable ───────────────────────────────────
+function initGSAPDrag() {
+  gsap.registerPlugin(Draggable);
+
+  const dropZones = Array.from(document.querySelectorAll('.kanban-cards'));
+
   document.querySelectorAll('.kanban-card').forEach(card => {
-    card.addEventListener('dragstart', e => {
-      draggedCard   = card;
-      dragFromList  = card.dataset.listId;
-      dragFromBoard = card.dataset.boardId;
-      card.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'move';
-    });
+    const handle = card.querySelector('.kanban-drag-handle');
+    if (!handle) return;
 
-    card.addEventListener('dragend', () => {
-      if (draggedCard) draggedCard.classList.remove('dragging');
-      document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-      draggedCard = null;
-    });
-  });
+    let fromListId, fromBoardId, fromListEl;
+    let activeZone = null;
 
-  document.querySelectorAll('.kanban-cards').forEach(col => {
-    col.addEventListener('dragover', e => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      col.classList.add('drag-over');
-    });
+    Draggable.create(card, {
+      type:    'x,y',
+      trigger: handle,
+      zIndex:  1000,
 
-    col.addEventListener('dragleave', e => {
-      if (!col.contains(e.relatedTarget)) col.classList.remove('drag-over');
-    });
+      onDragStart() {
+        fromListId  = card.dataset.listId;
+        fromBoardId = card.dataset.boardId;
+        fromListEl  = card.closest('.kanban-list');
+        card.classList.add('dragging');
+      },
 
-    col.addEventListener('drop', e => {
-      e.preventDefault();
-      col.classList.remove('drag-over');
-      if (!draggedCard) return;
+      onDrag() {
+        let found = null;
+        for (const zone of dropZones) {
+          if (this.hitTest(zone, '30%')) { found = zone; break; }
+        }
+        if (found !== activeZone) {
+          if (activeZone) activeZone.classList.remove('drag-over');
+          if (found)      found.classList.add('drag-over');
+          activeZone = found;
+        }
+      },
 
-      const toListId  = col.dataset.listId;
-      const toBoardId = col.dataset.boardId;
-      if (toListId === dragFromList && toBoardId === dragFromBoard) return;
-
-      // Capture everything before any async work
-      const card        = draggedCard;
-      const cardId      = card.dataset.cardId;
-      const fromBoardId = dragFromBoard;
-      const fromListId  = dragFromList;
-      const fromListEl  = card.closest('.kanban-list');
-      const toListEl    = col.closest('.kanban-list');
-
-      draggedCard   = null;
-      dragFromList  = null;
-      dragFromBoard = null;
-
-      moveCardToColumn(card, col, () => {
+      onDragEnd() {
         card.classList.remove('dragging');
-        card.dataset.listId  = toListId;
-        card.dataset.boardId = toBoardId;
-        updateCount(fromListEl);
-        updateCount(toListEl);
-      });
+        if (activeZone) activeZone.classList.remove('drag-over');
 
-      persistMove(cardId, fromBoardId, fromListId, toBoardId, toListId);
-    });
-  });
-}
+        const toZone = activeZone;
+        activeZone = null;
 
-// ── Touch Drag ───────────────────────────────────────
-let touchCard      = null;
-let touchClone     = null;
-let touchFromList  = null;
-let touchFromBoard = null;
+        if (!toZone) {
+          gsap.set(card, { x: 0, y: 0 });
+          return;
+        }
 
-function initTouchDrag() {
-  document.querySelectorAll('.kanban-card').forEach(card => {
-    card.addEventListener('touchstart', e => {
-      // Don't hijack touches on the edit button
-      if (e.target.closest('[data-edit-btn]')) return;
+        const toListId  = toZone.dataset.listId;
+        const toBoardId = toZone.dataset.boardId;
 
-      touchCard      = card;
-      touchFromList  = card.dataset.listId;
-      touchFromBoard = card.dataset.boardId;
+        if (toListId === fromListId && toBoardId === fromBoardId) {
+          gsap.set(card, { x: 0, y: 0 });
+          return;
+        }
 
-      const rect = card.getBoundingClientRect();
-      touchClone = card.cloneNode(true);
-      touchClone.classList.add('touch-clone');
-      touchClone.style.width  = rect.width  + 'px';
-      touchClone.style.left   = rect.left   + 'px';
-      touchClone.style.top    = rect.top    + 'px';
-      document.body.appendChild(touchClone);
+        const cardId   = card.dataset.cardId;
+        const toListEl = toZone.closest('.kanban-list');
 
-      card.classList.add('dragging');
-    }, { passive: true });
-  });
+        // Reset GSAP transform before DOM move so view transition captures clean state
+        gsap.set(card, { x: 0, y: 0, zIndex: '' });
 
-  document.addEventListener('touchmove', e => {
-    if (!touchClone) return;
-    e.preventDefault();
-
-    const touch = e.touches[0];
-    touchClone.style.left = (touch.clientX - touchClone.offsetWidth  / 2) + 'px';
-    touchClone.style.top  = (touch.clientY - touchClone.offsetHeight / 2) + 'px';
-
-    touchClone.style.visibility = 'hidden';
-    const el = document.elementFromPoint(touch.clientX, touch.clientY);
-    touchClone.style.visibility = 'visible';
-
-    document.querySelectorAll('.kanban-cards').forEach(c => c.classList.remove('drag-over'));
-    const col = el?.closest('.kanban-cards');
-    if (col) col.classList.add('drag-over');
-  }, { passive: false });
-
-  document.addEventListener('touchend', e => {
-    if (!touchCard || !touchClone) return;
-
-    const touch = e.changedTouches[0];
-    touchClone.style.visibility = 'hidden';
-    const el = document.elementFromPoint(touch.clientX, touch.clientY);
-    touchClone.style.visibility = 'visible';
-
-    const col = el?.closest('.kanban-cards');
-
-    if (col) {
-      const toListId  = col.dataset.listId;
-      const toBoardId = col.dataset.boardId;
-
-      if (toListId !== touchFromList || toBoardId !== touchFromBoard) {
-        const card       = touchCard;
-        const cardId     = card.dataset.cardId;
-        const fromBoard  = touchFromBoard;
-        const fromList   = touchFromList;
-        const fromListEl = card.closest('.kanban-list');
-        const toListEl   = col.closest('.kanban-list');
-
-        moveCardToColumn(card, col, () => {
+        moveCardToColumn(card, toZone, () => {
           card.dataset.listId  = toListId;
           card.dataset.boardId = toBoardId;
           updateCount(fromListEl);
           updateCount(toListEl);
         });
 
-        persistMove(cardId, fromBoard, fromList, toBoardId, toListId);
+        persistMove(cardId, fromBoardId, fromListId, toBoardId, toListId);
       }
-    }
-
-    document.querySelectorAll('.drag-over').forEach(c => c.classList.remove('drag-over'));
-    touchCard.classList.remove('dragging');
-    touchClone.remove();
-    touchClone     = null;
-    touchCard      = null;
-    touchFromList  = null;
-    touchFromBoard = null;
+    });
   });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  initDesktopDrag();
-  initTouchDrag();
+  if (typeof Draggable === 'undefined') {
+    console.error('GSAP Draggable not loaded.');
+    return;
+  }
+  initGSAPDrag();
 });

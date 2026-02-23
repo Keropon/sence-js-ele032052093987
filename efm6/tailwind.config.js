@@ -22,7 +22,13 @@ module.exports = {
   safelist: [
     'dragging',
     'drag-over',
-    'touch-clone',
+    'badge-Feature',
+    'badge-Task',
+    'badge-Bug',
+    'badge-Improvement',
+    'tag-Feature',
+    'tag-Bug',
+    'tag-Hotfix',
   ],
   plugins: [],
 }

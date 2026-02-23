@@ -1,7 +1,7 @@
 <div class="px-6 py-8 max-w-7xl mx-auto">
     <div class="flex items-end justify-between mb-2 flex-wrap gap-4">
         <h2 class="text-3xl font-black uppercase tracking-tight border-b-4 border-black pb-1">Mi Dashboard</h2>
-        <p class="text-xs font-bold uppercase tracking-widest text-gray-500">Drag &amp; Drop para mover tarjetas</p>
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-500">Arrastra desde el asa derecha para mover tarjetas</p>
     </div>
     <hr class="border-t-4 border-black mb-8">
 </div>
@@ -19,32 +19,51 @@
 
                 <div class="kanban-list-header">
                     <span>{{this.name}}</span>
-                    <span class="kanban-list-count">{{this.cards.length}}</span>
+                    <span class="kanban-list-count">{{length this.cards}}</span>
                 </div>
 
                 <div class="kanban-cards"
                      data-list-id="{{this.id}}"
                      data-board-id="{{../id}}">
+
                     {{#each this.cards}}
                     <div class="kanban-card"
-                         draggable="true"
                          data-card-id="{{this.id}}"
                          data-list-id="{{../id}}"
                          data-board-id="{{../../id}}">
 
-                        <!-- Title row + edit button -->
-                        <div class="flex items-start gap-2">
-                            <div class="kanban-card-title flex-1">{{this.title}}</div>
-                            <button draggable="false"
-                                    data-edit-btn
-                                    popovertarget="edit-{{this.id}}"
-                                    title="Editar tarjeta"
-                                    class="kanban-card-edit-btn">✎</button>
+                        <div class="kanban-card-body">
+                            <!-- Title row + edit button -->
+                            <div class="flex items-start justify-between gap-2 mb-2">
+                                <div class="kanban-card-title">{{this.titulo}}</div>
+                                <button draggable="false"
+                                        data-edit-btn
+                                        popovertarget="edit-{{this.id}}"
+                                        title="Editar tarjeta"
+                                        class="kanban-card-edit-btn">✎</button>
+                            </div>
+
+                            <!-- Badges -->
+                            <div class="flex gap-1 flex-wrap mb-2">
+                                <span class="badge badge-{{this.prioridad}}">{{this.prioridad}}</span>
+                                <span class="tag tag-{{this.tag}}">{{this.tag}}</span>
+                            </div>
+
+                            {{#if this.descripcion}}
+                            <div class="kanban-card-desc">{{this.descripcion}}</div>
+                            {{/if}}
+
+                            <div class="kanban-card-meta">
+                                <span>{{this.responsable}}</span>
+                                {{#if this.fecha_fin}}
+                                <span>{{formatDate this.fecha_fin}}</span>
+                                {{/if}}
+                            </div>
                         </div>
 
-                        {{#if this.description}}
-                        <div class="kanban-card-desc">{{this.description}}</div>
-                        {{/if}}
+                        <div class="kanban-drag-handle" title="Arrastrar tarjeta">
+                            <div class="drag-dots"></div>
+                        </div>
 
                         <!-- Edit popover -->
                         <div id="edit-{{this.id}}" popover>
@@ -55,29 +74,65 @@
                                 <input type="hidden" name="boardId" value="{{../../id}}">
                                 <input type="hidden" name="listId"  value="{{../id}}">
 
-                                <div class="mb-3">
-                                    <label class="block font-bold uppercase text-xs tracking-widest mb-1">Título</label>
-                                    <input type="text" name="title" value="{{this.title}}" required
-                                           class="w-full border-3 border-black px-3 py-2 text-sm font-medium focus:outline-none focus:shadow-brutal-sm bg-white">
-                                </div>
-                                <div class="mb-5">
-                                    <label class="block font-bold uppercase text-xs tracking-widest mb-1">Descripción</label>
-                                    <textarea name="description" rows="3"
-                                              class="w-full border-3 border-black px-3 py-2 text-sm font-medium focus:outline-none resize-none focus:shadow-brutal-sm bg-white">{{this.description}}</textarea>
+                                <div class="grid grid-cols-2 gap-3 mb-4">
+                                    <div class="col-span-2">
+                                        <label class="form-label">Título</label>
+                                        <input type="text" name="titulo" value="{{this.titulo}}" required class="form-input">
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Prioridad</label>
+                                        <select name="prioridad" class="select-brutal">
+                                            <option value="Feature"     {{#if (eq this.prioridad "Feature")}}selected{{/if}}>Feature</option>
+                                            <option value="Task"        {{#if (eq this.prioridad "Task")}}selected{{/if}}>Task</option>
+                                            <option value="Bug"         {{#if (eq this.prioridad "Bug")}}selected{{/if}}>Bug</option>
+                                            <option value="Improvement" {{#if (eq this.prioridad "Improvement")}}selected{{/if}}>Improvement</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">TAG</label>
+                                        <select name="tag" class="select-brutal">
+                                            <option value="Feature" {{#if (eq this.tag "Feature")}}selected{{/if}}>Feature</option>
+                                            <option value="Bug"     {{#if (eq this.tag "Bug")}}selected{{/if}}>Bug</option>
+                                            <option value="Hotfix"  {{#if (eq this.tag "Hotfix")}}selected{{/if}}>Hotfix</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <label class="form-label">Descripción</label>
+                                        <textarea name="descripcion" rows="2" class="form-input resize-none">{{this.descripcion}}</textarea>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Fecha Inicio</label>
+                                        <input type="date" name="fecha_inicio" value="{{this.fecha_inicio}}" class="form-input">
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Fecha Fin</label>
+                                        <input type="date" name="fecha_fin" value="{{this.fecha_fin}}" class="form-input">
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Autor</label>
+                                        <input type="text" name="autor" value="{{this.autor}}" class="form-input">
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Responsable</label>
+                                        <input type="text" name="responsable" value="{{this.responsable}}" class="form-input">
+                                    </div>
                                 </div>
 
-                                <div class="flex gap-2">
-                                    <button type="submit"
-                                            class="flex-1 bg-black text-white font-black uppercase tracking-widest text-xs py-2 px-3 border-3 border-black shadow-brutal hover:bg-white hover:text-black hover:shadow-brutal-lg transition-all duration-100 cursor-pointer">
-                                        Guardar
-                                    </button>
+                                <div class="flex gap-2 mb-3">
+                                    <button type="submit" class="btn-primary flex-1">Guardar</button>
                                     <button type="button"
                                             popovertarget="edit-{{this.id}}"
                                             popovertargetaction="hide"
-                                            class="flex-1 bg-white text-black font-black uppercase tracking-widest text-xs py-2 px-3 border-3 border-black hover:bg-black hover:text-white transition-all duration-100 cursor-pointer">
-                                        Cancelar
-                                    </button>
+                                            class="btn-secondary flex-1">Cancelar</button>
                                 </div>
+                            </form>
+
+                            <form method="POST" action="/eliminar-tarjeta"
+                                  onsubmit="return confirm('¿Eliminar esta tarjeta? Esta acción no se puede deshacer.')">
+                                <input type="hidden" name="cardId"  value="{{this.id}}">
+                                <input type="hidden" name="boardId" value="{{../../id}}">
+                                <input type="hidden" name="listId"  value="{{../id}}">
+                                <button type="submit" class="btn-danger w-full">Eliminar Tarjeta</button>
                             </form>
                         </div>
 
@@ -99,30 +154,58 @@
 
                     <form method="POST" action="/nueva-tarjeta">
                         <input type="hidden" name="boardId" value="{{../id}}">
-                        <input type="hidden" name="listId" value="{{this.id}}">
+                        <input type="hidden" name="listId"  value="{{this.id}}">
 
-                        <div class="mb-3">
-                            <label class="block font-bold uppercase text-xs tracking-widest mb-1">Título</label>
-                            <input type="text" name="title" placeholder="Título de la tarjeta" required
-                                   class="w-full border-3 border-black px-3 py-2 text-sm font-medium focus:outline-none focus:shadow-brutal-sm bg-white">
-                        </div>
-                        <div class="mb-5">
-                            <label class="block font-bold uppercase text-xs tracking-widest mb-1">Descripción</label>
-                            <textarea name="description" placeholder="Descripción (opcional)" rows="3"
-                                      class="w-full border-3 border-black px-3 py-2 text-sm font-medium focus:outline-none resize-none focus:shadow-brutal-sm bg-white"></textarea>
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="col-span-2">
+                                <label class="form-label">Título</label>
+                                <input type="text" name="titulo" placeholder="Título de la tarjeta" required class="form-input">
+                            </div>
+                            <div>
+                                <label class="form-label">Prioridad</label>
+                                <select name="prioridad" class="select-brutal">
+                                    <option value="Feature">Feature</option>
+                                    <option value="Task">Task</option>
+                                    <option value="Bug">Bug</option>
+                                    <option value="Improvement">Improvement</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label">TAG</label>
+                                <select name="tag" class="select-brutal">
+                                    <option value="Feature">Feature</option>
+                                    <option value="Bug">Bug</option>
+                                    <option value="Hotfix">Hotfix</option>
+                                </select>
+                            </div>
+                            <div class="col-span-2">
+                                <label class="form-label">Descripción</label>
+                                <textarea name="descripcion" placeholder="Descripción (opcional)" rows="2" class="form-input resize-none"></textarea>
+                            </div>
+                            <div>
+                                <label class="form-label">Fecha Inicio</label>
+                                <input type="date" name="fecha_inicio" class="form-input">
+                            </div>
+                            <div>
+                                <label class="form-label">Fecha Fin</label>
+                                <input type="date" name="fecha_fin" class="form-input">
+                            </div>
+                            <div>
+                                <label class="form-label">Autor</label>
+                                <input type="text" name="autor" placeholder="Nombre del autor" class="form-input">
+                            </div>
+                            <div>
+                                <label class="form-label">Responsable</label>
+                                <input type="text" name="responsable" placeholder="Nombre del responsable" class="form-input">
+                            </div>
                         </div>
 
                         <div class="flex gap-2">
-                            <button type="submit"
-                                    class="flex-1 bg-black text-white font-black uppercase tracking-widest text-xs py-2 px-3 border-3 border-black shadow-brutal hover:bg-white hover:text-black hover:shadow-brutal-lg transition-all duration-100 cursor-pointer">
-                                Agregar
-                            </button>
+                            <button type="submit" class="btn-primary flex-1">Agregar</button>
                             <button type="button"
                                     popovertarget="popover-{{../id}}-{{this.id}}"
                                     popovertargetaction="hide"
-                                    class="flex-1 bg-white text-black font-black uppercase tracking-widest text-xs py-2 px-3 border-3 border-black hover:bg-black hover:text-white transition-all duration-100 cursor-pointer">
-                                Cancelar
-                            </button>
+                                    class="btn-secondary flex-1">Cancelar</button>
                         </div>
                     </form>
                 </div>
