@@ -1,0 +1,57 @@
+{
+  "boards": [
+    {
+      "id": 1,
+      "name": "Proyecto Principal",
+      "lists": [
+        {
+          "id": 1,
+          "name": "Por Hacer",
+          "cards": [
+            {
+              "id": 1,
+              "title": "Diseñar interfaz de usuario",
+              "description": "Crear mockups en Figma"
+            },
+            {
+              "id": 5,
+              "title": "a",
+              "description": "aa"
+            },
+            {
+              "id": 3,
+              "title": "Desarrollar API REST",
+              "description": "Endpoints para usuarios y tareas"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "En Progreso",
+          "cards": [
+            {
+              "id": 4,
+              "title": "Configurar proyecto",
+              "description": "Inicializar Node.js y Express"
+            },
+            {
+              "id": 2,
+              "title": "Configurar base de datos",
+              "description": "Instalar y configurar PostgreSQL"
+            },
+            {
+              "id": 6,
+              "title": "a",
+              "description": "a"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Completado",
+          "cards": []
+        }
+      ]
+    }
+  ]
+}

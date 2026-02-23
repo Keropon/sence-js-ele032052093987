@@ -1,0 +1,136 @@
+<div class="px-6 py-8 max-w-7xl mx-auto">
+    <div class="flex items-end justify-between mb-2 flex-wrap gap-4">
+        <h2 class="text-3xl font-black uppercase tracking-tight border-b-4 border-black pb-1">Mi Dashboard</h2>
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-500">Drag &amp; Drop para mover tarjetas</p>
+    </div>
+    <hr class="border-t-4 border-black mb-8">
+</div>
+
+{{#each boards}}
+<div class="px-6 pb-10 max-w-7xl mx-auto">
+
+    <h3 class="text-xl font-black uppercase tracking-tight mb-5 border-l-[6px] border-black pl-3">{{this.name}}</h3>
+
+    <div class="kanban-board">
+        <div class="kanban-lists" data-board-id="{{this.id}}">
+
+            {{#each this.lists}}
+            <div class="kanban-list" data-list-id="{{this.id}}" data-board-id="{{../id}}">
+
+                <div class="kanban-list-header">
+                    <span>{{this.name}}</span>
+                    <span class="kanban-list-count">{{this.cards.length}}</span>
+                </div>
+
+                <div class="kanban-cards"
+                     data-list-id="{{this.id}}"
+                     data-board-id="{{../id}}">
+                    {{#each this.cards}}
+                    <div class="kanban-card"
+                         draggable="true"
+                         data-card-id="{{this.id}}"
+                         data-list-id="{{../id}}"
+                         data-board-id="{{../../id}}">
+
+                        <!-- Title row + edit button -->
+                        <div class="flex items-start gap-2">
+                            <div class="kanban-card-title flex-1">{{this.title}}</div>
+                            <button draggable="false"
+                                    data-edit-btn
+                                    popovertarget="edit-{{this.id}}"
+                                    title="Editar tarjeta"
+                                    class="kanban-card-edit-btn">✎</button>
+                        </div>
+
+                        {{#if this.description}}
+                        <div class="kanban-card-desc">{{this.description}}</div>
+                        {{/if}}
+
+                        <!-- Edit popover -->
+                        <div id="edit-{{this.id}}" popover>
+                            <h4 class="text-lg font-black uppercase tracking-tight mb-1 border-b-4 border-black pb-2">Editar Tarjeta</h4>
+
+                            <form method="POST" action="/editar-tarjeta">
+                                <input type="hidden" name="cardId"  value="{{this.id}}">
+                                <input type="hidden" name="boardId" value="{{../../id}}">
+                                <input type="hidden" name="listId"  value="{{../id}}">
+
+                                <div class="mb-3">
+                                    <label class="block font-bold uppercase text-xs tracking-widest mb-1">Título</label>
+                                    <input type="text" name="title" value="{{this.title}}" required
+                                           class="w-full border-3 border-black px-3 py-2 text-sm font-medium focus:outline-none focus:shadow-brutal-sm bg-white">
+                                </div>
+                                <div class="mb-5">
+                                    <label class="block font-bold uppercase text-xs tracking-widest mb-1">Descripción</label>
+                                    <textarea name="description" rows="3"
+                                              class="w-full border-3 border-black px-3 py-2 text-sm font-medium focus:outline-none resize-none focus:shadow-brutal-sm bg-white">{{this.description}}</textarea>
+                                </div>
+
+                                <div class="flex gap-2">
+                                    <button type="submit"
+                                            class="flex-1 bg-black text-white font-black uppercase tracking-widest text-xs py-2 px-3 border-3 border-black shadow-brutal hover:bg-white hover:text-black hover:shadow-brutal-lg transition-all duration-100 cursor-pointer">
+                                        Guardar
+                                    </button>
+                                    <button type="button"
+                                            popovertarget="edit-{{this.id}}"
+                                            popovertargetaction="hide"
+                                            class="flex-1 bg-white text-black font-black uppercase tracking-widest text-xs py-2 px-3 border-3 border-black hover:bg-black hover:text-white transition-all duration-100 cursor-pointer">
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                    </div>
+                    {{/each}}
+                </div>
+
+                <div class="p-3 pt-1">
+                    <button
+                        popovertarget="popover-{{../id}}-{{this.id}}"
+                        class="w-full border-3 border-black bg-black text-white font-black uppercase tracking-widest text-xs py-2 px-4 hover:bg-white hover:text-black transition-all duration-100 cursor-pointer shadow-brutal-sm hover:shadow-brutal">
+                        + Agregar Tarjeta
+                    </button>
+                </div>
+
+                <div id="popover-{{../id}}-{{this.id}}" popover>
+                    <h4 class="text-lg font-black uppercase tracking-tight mb-1 border-b-4 border-black pb-2">Nueva Tarjeta</h4>
+                    <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">Lista: {{this.name}}</p>
+
+                    <form method="POST" action="/nueva-tarjeta">
+                        <input type="hidden" name="boardId" value="{{../id}}">
+                        <input type="hidden" name="listId" value="{{this.id}}">
+
+                        <div class="mb-3">
+                            <label class="block font-bold uppercase text-xs tracking-widest mb-1">Título</label>
+                            <input type="text" name="title" placeholder="Título de la tarjeta" required
+                                   class="w-full border-3 border-black px-3 py-2 text-sm font-medium focus:outline-none focus:shadow-brutal-sm bg-white">
+                        </div>
+                        <div class="mb-5">
+                            <label class="block font-bold uppercase text-xs tracking-widest mb-1">Descripción</label>
+                            <textarea name="description" placeholder="Descripción (opcional)" rows="3"
+                                      class="w-full border-3 border-black px-3 py-2 text-sm font-medium focus:outline-none resize-none focus:shadow-brutal-sm bg-white"></textarea>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button type="submit"
+                                    class="flex-1 bg-black text-white font-black uppercase tracking-widest text-xs py-2 px-3 border-3 border-black shadow-brutal hover:bg-white hover:text-black hover:shadow-brutal-lg transition-all duration-100 cursor-pointer">
+                                Agregar
+                            </button>
+                            <button type="button"
+                                    popovertarget="popover-{{../id}}-{{this.id}}"
+                                    popovertargetaction="hide"
+                                    class="flex-1 bg-white text-black font-black uppercase tracking-widest text-xs py-2 px-3 border-3 border-black hover:bg-black hover:text-white transition-all duration-100 cursor-pointer">
+                                Cancelar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+            {{/each}}
+
+        </div>
+    </div>
+</div>
+{{/each}}
