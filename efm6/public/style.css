@@ -585,6 +585,7 @@ a:hover {
 .kanban-board {
   overflow-x: auto;
   padding-bottom: 1.5rem;
+  scroll-snap-type: x mandatory;
 }
 
 .kanban-lists {
@@ -592,7 +593,8 @@ a:hover {
   gap: 1rem;
   min-width: -moz-max-content;
   min-width: max-content;
-  align-items: flex-start;
+  align-items: stretch;
+  min-height: 600px;
 }
 
 .kanban-list {
@@ -602,6 +604,7 @@ a:hover {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  scroll-snap-align: start;
 }
 
 .kanban-list-header {
@@ -927,6 +930,178 @@ a:hover {
   color: #fff;
 }
 
+/* ── Nueva Lista column ────────────────────────── */
+
+.kanban-list-new {
+  flex-shrink: 0;
+  width: 48px;
+  align-self: stretch;
+  scroll-snap-align: start;
+  background: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.4rem 0;
+  gap: 0.5rem;
+  transition: background 0.1s;
+  font-family: inherit;
+}
+
+.kanban-list-new:hover {
+  background: #333;
+}
+
+.nueva-lista-icon {
+  font-size: 1.1rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.nueva-lista-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  flex: 1;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* ── List fold / delete controls ───────────────── */
+
+.list-fold-btn,
+  .list-delete-btn {
+  background: transparent;
+  border: 1.5px solid rgba(255,255,255,0.45);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 900;
+  line-height: 1;
+  padding: 0.15rem 0.3rem;
+  cursor: pointer;
+  transition: background 0.1s, border-color 0.1s, color 0.1s;
+}
+
+.list-fold-btn:hover {
+  background: rgba(255,255,255,0.2);
+  border-color: #fff;
+}
+
+.list-delete-btn:hover {
+  background: #cc0000;
+  border-color: #cc0000;
+  color: #fff;
+}
+
+/* ── Folded list ────────────────────────────────── */
+
+.kanban-list-folded-panel {
+  display: none;
+}
+
+.kanban-list.folded {
+  width: 48px;
+  align-self: stretch;
+}
+
+.kanban-list.folded .kanban-list-header,
+  .kanban-list.folded .kanban-cards,
+  .kanban-list.folded > .p-3 {
+  display: none;
+}
+
+.kanban-list.folded .kanban-list-folded-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-height: 120px;
+  padding: 0.4rem 0;
+  gap: 0.5rem;
+  background: #000;
+  color: #fff;
+}
+
+.list-unfold-btn {
+  background: #fff;
+  color: #000;
+  border: none;
+  font-size: 0.55rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  padding: 0.2rem 0;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+  transition: background 0.1s;
+}
+
+.list-unfold-btn:hover {
+  background: #ddd;
+}
+
+.kanban-list-count-v {
+  background: #fff;
+  color: #000;
+  font-size: 0.65rem;
+  font-weight: 900;
+  padding: 0.1rem 0.35rem;
+  text-align: center;
+  min-width: 20px;
+}
+
+.kanban-list-folded-title {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: #fff;
+  flex: 1;
+  overflow: hidden;
+  text-align: center;
+}
+
+/* ── File input ────────────────────────────────── */
+
+.form-input-file {
+  width: 100%;
+  border: 3px solid #000;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: #fff;
+  color: #000;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.form-input-file::file-selector-button {
+  background: #000;
+  color: #fff;
+  border: none;
+  border-right: 3px solid #000;
+  border-radius: 0;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  padding: 0.3rem 0.75rem;
+  margin-right: 0.75rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.form-input-file::file-selector-button:hover {
+  background: #333;
+}
+
 .col-span-2 {
   grid-column: span 2 / span 2;
 }
@@ -982,6 +1157,10 @@ a:hover {
   margin-bottom: 2rem;
 }
 
+.ml-2 {
+  margin-left: 0.5rem;
+}
+
 .mt-auto {
   margin-top: auto;
 }
@@ -1024,6 +1203,10 @@ a:hover {
 
 .flex-1 {
   flex: 1 1 0%;
+}
+
+.flex-shrink-0 {
+  flex-shrink: 0;
 }
 
 .transform {
@@ -1092,6 +1275,10 @@ a:hover {
 
 .gap-6 {
   gap: 1.5rem;
+}
+
+.overflow-hidden {
+  overflow: hidden;
 }
 
 .border-2 {
@@ -1314,6 +1501,10 @@ a:hover {
 
 .tracking-tight {
   letter-spacing: -0.025em;
+}
+
+.tracking-wider {
+  letter-spacing: 0.05em;
 }
 
 .tracking-widest {

@@ -1,0 +1,103 @@
+flowchart TD
+
+    %% ── Páginas Estáticas ────────────────────────────────────────────────────────────
+    subgraph Páginas["Páginas (GET — Rendereadas vía Handlebars)"]
+        HOME["/ · Inicio
+        Landing estática con descripción del producto
+        y accesos a Login y Registro"]
+
+        LOGIN["/login · Iniciar Sesión
+        Formulario de acceso — solo interfaz
+        sin autenticación de backend"]
+
+        REGISTER["/register · Registro
+        Formulario de alta — solo interfaz
+        sin autenticación de backend"]
+
+        DASH["/dashboard · Dashboard
+        Tablero Kanban principal
+        Lee data.json con fs.readFileSync y renderiza
+        tableros, listas y tarjetas
+        Drag-and-drop con GSAP Draggable
+        Formularios vía HTML Popover API nativo"]
+    end
+
+    %% ── Rutas Kanban - Tarjetas ─────────────────────────────────────────────────────────────
+    subgraph RCards["Rutas - Tarjetas"]
+        NT["POST /nueva-tarjeta
+        Crea tarjeta con schema completo
+        (titulo, descripcion, prioridad, tag,
+        estado, fechas, autor, responsable)
+        → redirect /dashboard"]
+
+        ET["POST /editar-tarjeta
+        Actualiza todos los campos editables
+        de una tarjeta existente
+        → redirect /dashboard"]
+
+        XT["POST /eliminar-tarjeta
+        Elimina tarjeta por cardId + listId + boardId
+        → redirect /dashboard"]
+
+        MT["POST /mover-tarjeta
+        Mueve tarjeta de una lista a otra
+        Actualiza card.estado al estado de la lista destino
+        Consumido con fetch — responde JSON {ok}"]
+    end
+
+    %% ── Rutas Kanban - Listas ─────────────────────────────────────────────────────────────
+    subgraph RLists["Rutas - Listas"]
+        NL["POST /nueva-lista
+        Agrega lista vacía a un tablero
+        Genera id autoincremental
+        → redirect /dashboard"]
+
+        XL["POST /eliminar-lista
+        Elimina lista y todas sus tarjetas
+        Consumido con fetch — responde JSON {ok}"]
+    end
+
+    %% ── Rutas Kanban - IO ─────────────────────────────────────────────────────────
+    subgraph RData["Routes — Import / Export"]
+        EXP["GET /exportar-datos
+        Envía data.json como descarga
+        con nombre kanbanpro-export.json
+        → res.download"]
+
+        IMP["POST /importar-datos
+        Recibe JSON via fetch (parseado con
+        FileReader en el cliente)
+        Valida estructura boards[]
+        Sobreescribe data.json completo
+        → responde JSON {ok}"]
+    end
+
+    %% ── Data ──────────────────────────────────────────────────────────────
+    DB[("data.json
+        ──────────
+        Única fuente de datos
+        Contiene boards → lists → cards
+        Leído y escrito con
+        fs.readFileSync / writeFileSync")]
+
+    %% ── Navegación ──────────────────────────────────────────────────────────────
+    HOME <-->|"header nav"| LOGIN
+    HOME <-->|"header nav"| REGISTER
+    HOME <-->|"header nav"| DASH
+
+    %% ── Dashboard → rutas ──────────────────────────────────────────────────────
+    DASH -->|"Popover form POST"| NT
+    DASH -->|"Popover form POST"| ET
+    DASH -->|"Popover form POST + confirm()"| XT
+    DASH -->|"fetch (GSAP onDragEnd)"| MT
+    DASH -->|"Popover form POST"| NL
+    DASH -->|"fetch + confirm()"| XL
+    DASH -->|"window.location"| EXP
+    DASH -->|"FileReader + fetch"| IMP
+
+    %% ── Rutas → data.json ──────────────────────────────────────────────────────
+    NT & ET & XT & MT -->|"read + write"| DB
+    NL & XL          -->|"read + write"| DB
+    IMP              -->|"writeFileSync"| DB
+    EXP              -->|"res.download"| DB
+    DB               -->|"readFileSync on GET /dashboard"| DASH

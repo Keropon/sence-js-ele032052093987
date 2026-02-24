@@ -1,9 +1,30 @@
 <div class="px-6 py-8 max-w-7xl mx-auto">
     <div class="flex items-end justify-between mb-2 flex-wrap gap-4">
         <h2 class="text-3xl font-black uppercase tracking-tight border-b-4 border-black pb-1">Mi Dashboard</h2>
-        <p class="text-xs font-bold uppercase tracking-widest text-gray-500">Arrastra desde el asa derecha para mover tarjetas</p>
+        <div class="flex items-center gap-3 flex-wrap">
+            <p class="text-xs font-bold uppercase tracking-widest text-gray-500">Arrastra desde el asa derecha para
+                mover tarjetas</p>
+            <button onclick="location.href='/exportar-datos'" class="btn-secondary">↓ Exportar</button>
+            <button popovertarget="popover-importar" class="btn-primary">↑ Importar</button>
+        </div>
     </div>
     <hr class="border-t-4 border-black mb-8">
+</div>
+
+<div id="popover-importar" popover="manual">
+    <h4 class="text-lg font-black uppercase tracking-tight mb-1 border-b-4 border-black pb-2">Importar Datos</h4>
+    <p class="text-xs font-bold uppercase tracking-wider mb-4" style="color:#cc0000;">⚠ Esto reemplazará todos los datos
+        actuales.</p>
+
+    <div class="mb-5">
+        <label class="form-label">Archivo JSON</label>
+        <input type="file" id="import-file-input" accept=".json" class="form-input-file">
+    </div>
+    <div class="flex gap-2">
+        <button type="button" id="import-confirm-btn" class="btn-primary flex-1">Importar</button>
+        <button type="button" popovertarget="popover-importar" popovertargetaction="hide"
+            class="btn-secondary flex-1">Cancelar</button>
+    </div>
 </div>
 
 {{#each boards}}
@@ -18,32 +39,35 @@
             <div class="kanban-list" data-list-id="{{this.id}}" data-board-id="{{../id}}">
 
                 <div class="kanban-list-header">
-                    <span>{{this.name}}</span>
-                    <span class="kanban-list-count">{{length this.cards}}</span>
+                    <span class="flex-1 overflow-hidden"
+                        style="text-overflow:ellipsis;white-space:nowrap;">{{this.name}}</span>
+                    <div class="flex gap-1 items-center flex-shrink-0 ml-2">
+                        <span class="kanban-list-count">{{length this.cards}}</span>
+                        <button class="list-fold-btn" title="Plegar">‹‹</button>
+                        <button class="list-delete-btn" data-list-id="{{this.id}}" data-board-id="{{../id}}"
+                            title="Eliminar lista">×</button>
+                    </div>
                 </div>
 
-                <div class="kanban-cards"
-                     data-list-id="{{this.id}}"
-                     data-board-id="{{../id}}">
+                <div class="kanban-list-folded-panel">
+                    <button class="list-unfold-btn" title="Desplegar">VER</button>
+                    <span class="kanban-list-count-v">{{length this.cards}}</span>
+                    <span class="kanban-list-folded-title">{{this.name}}</span>
+                </div>
+
+                <div class="kanban-cards" data-list-id="{{this.id}}" data-board-id="{{../id}}">
 
                     {{#each this.cards}}
-                    <div class="kanban-card"
-                         data-card-id="{{this.id}}"
-                         data-list-id="{{../id}}"
-                         data-board-id="{{../../id}}">
+                    <div class="kanban-card" data-card-id="{{this.id}}" data-list-id="{{../id}}"
+                        data-board-id="{{../../id}}">
 
                         <div class="kanban-card-body">
-                            <!-- Title row + edit button -->
                             <div class="flex items-start justify-between gap-2 mb-2">
                                 <div class="kanban-card-title">{{this.titulo}}</div>
-                                <button draggable="false"
-                                        data-edit-btn
-                                        popovertarget="edit-{{this.id}}"
-                                        title="Editar tarjeta"
-                                        class="kanban-card-edit-btn">✎</button>
+                                <button draggable="false" data-edit-btn popovertarget="edit-{{this.id}}"
+                                    title="Editar tarjeta" class="kanban-card-edit-btn">✎</button>
                             </div>
 
-                            <!-- Badges -->
                             <div class="flex gap-1 flex-wrap mb-2">
                                 <span class="badge badge-{{this.prioridad}}">{{this.prioridad}}</span>
                                 <span class="tag tag-{{this.tag}}">{{this.tag}}</span>
@@ -65,48 +89,58 @@
                             <div class="drag-dots"></div>
                         </div>
 
-                        <!-- Edit popover -->
-                        <div id="edit-{{this.id}}" popover>
-                            <h4 class="text-lg font-black uppercase tracking-tight mb-1 border-b-4 border-black pb-2">Editar Tarjeta</h4>
+                        <div id="edit-{{this.id}}" popover="manual">
+                            <h4 class="text-lg font-black uppercase tracking-tight mb-1 border-b-4 border-black pb-2">
+                                Editar Tarjeta</h4>
 
                             <form method="POST" action="/editar-tarjeta">
-                                <input type="hidden" name="cardId"  value="{{this.id}}">
+                                <input type="hidden" name="cardId" value="{{this.id}}">
                                 <input type="hidden" name="boardId" value="{{../../id}}">
-                                <input type="hidden" name="listId"  value="{{../id}}">
+                                <input type="hidden" name="listId" value="{{../id}}">
 
                                 <div class="grid grid-cols-2 gap-3 mb-4">
                                     <div class="col-span-2">
                                         <label class="form-label">Título</label>
-                                        <input type="text" name="titulo" value="{{this.titulo}}" required class="form-input">
+                                        <input type="text" name="titulo" value="{{this.titulo}}" required
+                                            class="form-input">
                                     </div>
                                     <div>
                                         <label class="form-label">Prioridad</label>
                                         <select name="prioridad" class="select-brutal">
-                                            <option value="Feature"     {{#if (eq this.prioridad "Feature")}}selected{{/if}}>Feature</option>
-                                            <option value="Task"        {{#if (eq this.prioridad "Task")}}selected{{/if}}>Task</option>
-                                            <option value="Bug"         {{#if (eq this.prioridad "Bug")}}selected{{/if}}>Bug</option>
-                                            <option value="Improvement" {{#if (eq this.prioridad "Improvement")}}selected{{/if}}>Improvement</option>
+                                            <option value="Feature" {{#if (eq this.prioridad "Feature"
+                                                )}}selected{{/if}}>Feature</option>
+                                            <option value="Task" {{#if (eq this.prioridad "Task" )}}selected{{/if}}>Task
+                                            </option>
+                                            <option value="Bug" {{#if (eq this.prioridad "Bug" )}}selected{{/if}}>Bug
+                                            </option>
+                                            <option value="Improvement" {{#if (eq this.prioridad "Improvement"
+                                                )}}selected{{/if}}>Improvement</option>
                                         </select>
                                     </div>
                                     <div>
                                         <label class="form-label">TAG</label>
                                         <select name="tag" class="select-brutal">
-                                            <option value="Feature" {{#if (eq this.tag "Feature")}}selected{{/if}}>Feature</option>
-                                            <option value="Bug"     {{#if (eq this.tag "Bug")}}selected{{/if}}>Bug</option>
-                                            <option value="Hotfix"  {{#if (eq this.tag "Hotfix")}}selected{{/if}}>Hotfix</option>
+                                            <option value="Feature" {{#if (eq this.tag "Feature" )}}selected{{/if}}>
+                                                Feature</option>
+                                            <option value="Bug" {{#if (eq this.tag "Bug" )}}selected{{/if}}>Bug</option>
+                                            <option value="Hotfix" {{#if (eq this.tag "Hotfix" )}}selected{{/if}}>Hotfix
+                                            </option>
                                         </select>
                                     </div>
                                     <div class="col-span-2">
                                         <label class="form-label">Descripción</label>
-                                        <textarea name="descripcion" rows="2" class="form-input resize-none">{{this.descripcion}}</textarea>
+                                        <textarea name="descripcion" rows="2"
+                                            class="form-input resize-none">{{this.descripcion}}</textarea>
                                     </div>
                                     <div>
                                         <label class="form-label">Fecha Inicio</label>
-                                        <input type="date" name="fecha_inicio" value="{{this.fecha_inicio}}" class="form-input">
+                                        <input type="date" name="fecha_inicio" value="{{this.fecha_inicio}}"
+                                            class="form-input">
                                     </div>
                                     <div>
                                         <label class="form-label">Fecha Fin</label>
-                                        <input type="date" name="fecha_fin" value="{{this.fecha_fin}}" class="form-input">
+                                        <input type="date" name="fecha_fin" value="{{this.fecha_fin}}"
+                                            class="form-input">
                                     </div>
                                     <div>
                                         <label class="form-label">Autor</label>
@@ -114,24 +148,23 @@
                                     </div>
                                     <div>
                                         <label class="form-label">Responsable</label>
-                                        <input type="text" name="responsable" value="{{this.responsable}}" class="form-input">
+                                        <input type="text" name="responsable" value="{{this.responsable}}"
+                                            class="form-input">
                                     </div>
                                 </div>
 
                                 <div class="flex gap-2 mb-3">
                                     <button type="submit" class="btn-primary flex-1">Guardar</button>
-                                    <button type="button"
-                                            popovertarget="edit-{{this.id}}"
-                                            popovertargetaction="hide"
-                                            class="btn-secondary flex-1">Cancelar</button>
+                                    <button type="button" popovertarget="edit-{{this.id}}" popovertargetaction="hide"
+                                        class="btn-secondary flex-1">Cancelar</button>
                                 </div>
                             </form>
 
                             <form method="POST" action="/eliminar-tarjeta"
-                                  onsubmit="return confirm('¿Eliminar esta tarjeta? Esta acción no se puede deshacer.')">
-                                <input type="hidden" name="cardId"  value="{{this.id}}">
+                                onsubmit="return confirm('¿Eliminar esta tarjeta? Esta acción no se puede deshacer.')">
+                                <input type="hidden" name="cardId" value="{{this.id}}">
                                 <input type="hidden" name="boardId" value="{{../../id}}">
-                                <input type="hidden" name="listId"  value="{{../id}}">
+                                <input type="hidden" name="listId" value="{{../id}}">
                                 <button type="submit" class="btn-danger w-full">Eliminar Tarjeta</button>
                             </form>
                         </div>
@@ -141,25 +174,26 @@
                 </div>
 
                 <div class="p-3 pt-1">
-                    <button
-                        popovertarget="popover-{{../id}}-{{this.id}}"
+                    <button popovertarget="popover-{{../id}}-{{this.id}}"
                         class="w-full border-3 border-black bg-black text-white font-black uppercase tracking-widest text-xs py-2 px-4 hover:bg-white hover:text-black transition-all duration-100 cursor-pointer shadow-brutal-sm hover:shadow-brutal">
                         + Agregar Tarjeta
                     </button>
                 </div>
 
-                <div id="popover-{{../id}}-{{this.id}}" popover>
-                    <h4 class="text-lg font-black uppercase tracking-tight mb-1 border-b-4 border-black pb-2">Nueva Tarjeta</h4>
+                <div id="popover-{{../id}}-{{this.id}}" popover="manual">
+                    <h4 class="text-lg font-black uppercase tracking-tight mb-1 border-b-4 border-black pb-2">Nueva
+                        Tarjeta</h4>
                     <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">Lista: {{this.name}}</p>
 
                     <form method="POST" action="/nueva-tarjeta">
                         <input type="hidden" name="boardId" value="{{../id}}">
-                        <input type="hidden" name="listId"  value="{{this.id}}">
+                        <input type="hidden" name="listId" value="{{this.id}}">
 
                         <div class="grid grid-cols-2 gap-3 mb-4">
                             <div class="col-span-2">
                                 <label class="form-label">Título</label>
-                                <input type="text" name="titulo" placeholder="Título de la tarjeta" required class="form-input">
+                                <input type="text" name="titulo" placeholder="Título de la tarjeta" required
+                                    class="form-input">
                             </div>
                             <div>
                                 <label class="form-label">Prioridad</label>
@@ -180,7 +214,8 @@
                             </div>
                             <div class="col-span-2">
                                 <label class="form-label">Descripción</label>
-                                <textarea name="descripcion" placeholder="Descripción (opcional)" rows="2" class="form-input resize-none"></textarea>
+                                <textarea name="descripcion" placeholder="Descripción (opcional)" rows="2"
+                                    class="form-input resize-none"></textarea>
                             </div>
                             <div>
                                 <label class="form-label">Fecha Inicio</label>
@@ -196,16 +231,15 @@
                             </div>
                             <div>
                                 <label class="form-label">Responsable</label>
-                                <input type="text" name="responsable" placeholder="Nombre del responsable" class="form-input">
+                                <input type="text" name="responsable" placeholder="Nombre del responsable"
+                                    class="form-input">
                             </div>
                         </div>
 
                         <div class="flex gap-2">
                             <button type="submit" class="btn-primary flex-1">Agregar</button>
-                            <button type="button"
-                                    popovertarget="popover-{{../id}}-{{this.id}}"
-                                    popovertargetaction="hide"
-                                    class="btn-secondary flex-1">Cancelar</button>
+                            <button type="button" popovertarget="popover-{{../id}}-{{this.id}}"
+                                popovertargetaction="hide" class="btn-secondary flex-1">Cancelar</button>
                         </div>
                     </form>
                 </div>
@@ -213,7 +247,32 @@
             </div>
             {{/each}}
 
+            <button popovertarget="popover-nueva-lista-{{this.id}}" class="kanban-list-new">
+                <span class="nueva-lista-icon">+</span>
+                <span class="nueva-lista-label">Nueva Lista</span>
+            </button>
+
         </div>
     </div>
+</div>
+
+<div id="popover-nueva-lista-{{this.id}}" popover="manual">
+    <h4 class="text-lg font-black uppercase tracking-tight mb-1 border-b-4 border-black pb-2">Nueva Lista</h4>
+    <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">Tablero: {{this.name}}</p>
+
+    <form method="POST" action="/nueva-lista">
+        <input type="hidden" name="boardId" value="{{this.id}}">
+
+        <div class="mb-4">
+            <label class="form-label">Nombre de la lista</label>
+            <input type="text" name="name" placeholder="Ej: En revisión" required class="form-input">
+        </div>
+
+        <div class="flex gap-2">
+            <button type="submit" class="btn-primary flex-1">Crear Lista</button>
+            <button type="button" popovertarget="popover-nueva-lista-{{this.id}}" popovertargetaction="hide"
+                class="btn-secondary flex-1">Cancelar</button>
+        </div>
+    </form>
 </div>
 {{/each}}

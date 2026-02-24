@@ -1,0 +1,82 @@
+{
+  "boards": [
+    {
+      "id": 1,
+      "name": "Proyecto Principal",
+      "lists": [
+        {
+          "id": 1,
+          "name": "Backlog",
+          "estado": "Backlog",
+          "cards": [
+            {
+              "id": 4,
+              "titulo": "Corregir error de login",
+              "descripcion": "El token no se invalida correctamente al cerrar sesión",
+              "prioridad": "Bug",
+              "tag": "Bug",
+              "estado": "Backlog",
+              "fecha_creacion": "2025-01-15",
+              "fecha_inicio": "2025-01-16",
+              "fecha_fin": "2025-01-18",
+              "autor": "María Pérez",
+              "responsable": "María Pérez"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Review",
+          "estado": "Review",
+          "cards": [
+            {
+              "id": 5,
+              "titulo": "Optimizar consultas SQL",
+              "descripcion": "Las consultas de listado tardan más de 2 segundos en producción",
+              "prioridad": "Improvement",
+              "tag": "Hotfix",
+              "estado": "Review",
+              "fecha_creacion": "2025-01-08",
+              "fecha_inicio": "2025-01-14",
+              "fecha_fin": "2025-01-21",
+              "autor": "Ana García",
+              "responsable": "Ana García"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "caca",
+          "estado": "caca",
+          "cards": [
+            {
+              "id": 3,
+              "titulo": "Desarrollar API REST",
+              "descripcion": "Endpoints para usuarios y tareas con autenticación JWT",
+              "prioridad": "Feature",
+              "tag": "Feature",
+              "estado": "caca",
+              "fecha_creacion": "2025-01-12",
+              "fecha_inicio": "2025-01-18",
+              "fecha_fin": "2025-02-05",
+              "autor": "Carlos López",
+              "responsable": "Carlos López"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "asdfasdf",
+          "estado": "asdfasdf",
+          "cards": []
+        },
+        {
+          "id": 6,
+          "name": "asdfasdf",
+          "estado": "asdfasdf",
+          "cards": []
+        }
+      ]
+    }
+  ]
+}
